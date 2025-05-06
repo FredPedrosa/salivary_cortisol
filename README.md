@@ -4,7 +4,7 @@ R syntax for analyzing cortisol data from an experiment comparing stress reducti
 
 ## Key Analysis Features
 
-- **Cortisol Unit Conversion**: Values converted from nmol/L to µg/dL using factor 27.7 for clinical interpretation[1][3]
+- **Cortisol Unit Conversion**: Values converted from nmol/L to µg/dL using factor 27.7 for clinical interpretation
 - **Nonparametric Methods**:
   - `nparLD` package for factorial repeated measures ANOVA
   - Wilcoxon signed-rank tests for within-group effects
@@ -54,16 +54,14 @@ Example:
 
 ## Key Findings
 - **No significant group × time interaction** in factorial ANOVA (`p = 0.82`)
-- **Large within-group effect** in experimental group (r = 0.62)
-- **Moderate control group effect** (r = 0.41)
+- **Large within-group effect** in experimental group (r = 0.85)
+- **Moderate control group effect** (r = 0.42)
 
 ## Repository Structure
 
 
 ** dissertation_acute.Rmd # Main analysis script
-** Dados_Agudo.xlsx # Raw cortisol measurements
-** Figures/ # Generated boxplot visuals
-** dados_longo.xlsx # Transformed long-format data
+** PDF form of analysis
 
 Sales, I. & Pedrosa, F.G. (2024). Acute stress reduction through auditory interventions:
 A psychobiological analysis using salivary cortisol. University of Minas Gerais. https://github.com/FredPedrosa/salivary_cortisol/
