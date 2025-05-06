@@ -1,4 +1,6 @@
 # Acute Stress Reduction Analysis: Music vs. Podcast Intervention
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) 
+
 
 R syntax for analyzing cortisol data from an experiment comparing stress reduction between music (experimental group) and podcast (control group) interventions over 25 minutes.
 
@@ -60,8 +62,8 @@ Example:
 ## Repository Structure
 
 
-** dissertation_acute.Rmd # Main analysis script
-** PDF form of analysis
+* dissertation_acute.Rmd # Main analysis script
+* PDF form of analysis
 
 Sales, I. & Pedrosa, F.G. (2024). Acute stress reduction through auditory interventions:
 A psychobiological analysis using salivary cortisol. University of Minas Gerais. https://github.com/FredPedrosa/salivary_cortisol/
@@ -72,7 +74,7 @@ Ph.D., Neuroscience ,
 isabela_nutricionista@yahoo.com
 Neroscience Program, UFMG  
 
-**Advisor and data analyst**: 
+## Advisor and data analyst 
 Ph.D., Prof. Frederico G. Pedrosa  
 fredericopedrosa@ufmg.br
 
