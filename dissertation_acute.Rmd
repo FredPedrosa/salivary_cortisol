@@ -1,0 +1,198 @@
+---
+title: "Acute Stress Reduction Analysis: Music vs. Podcast Intervention"
+author: "Frederico Pedrosa"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: true
+  html_document:
+    toc: true
+---
+
+Data analysis for an experiment that investigated whether listening to music (experimental group) for 25 minutes versus listening to a podcast (control group) for 25 minutes reduces participants' stress levels
+
+## **Preparing data**
+
+```{r setting}
+library(readxl)     #read .xlsx files
+library(haven)      #treat data
+library(ggplot2)    #draw images
+library(gridExtra)  #treat images
+library(nparLD)     #non parametric ANOVA
+library(dplyr)      #allow code in pipelines
+library(rstatix)    #estimate effect sizes
+
+dado <- read_excel("~/Isabela/Dados_Agudo.xlsx")
+dado$Grupo <- ifelse(dado$Grupo == "Controle", "Control", "Experimental")
+dado <- as_factor(dado)
+table(dado$Grupo)
+```
+
+**Preparing salivary cortisol data**
+
+The values for salivary cortisol (Cortpre and Cortpos) were multiplied by 27.7 to convert the units from nmol/L to ng/dL. This conversion is necessary because some reference ranges and comparative studies report cortisol levels in ng/dL. The factor 27.7 is derived from the molecular weight of cortisol (approximately 362.5 g/mol), allowing for consistent interpretation and comparison of results across different measurement systems.
+
+The data do not follow a normal distribution.
+
+```{r}
+dado$Cortpre <- dado$Cortpre * 27.7
+dado$Cortpos <- dado$Cortpos * 27.7
+shapiro.test(dado$Cortpre)
+shapiro.test(dado$Cortpos)
+
+```
+
+
+```{r}
+# Subset data by group
+intervention_data <- dado[dado$Grupo == "Experimental", ]
+control_data <- dado[dado$Grupo == "Control", ]
+
+# Create a combined boxplot and scatter plot for Cortpre in the Experimental group
+combined_plot_intervention_pre <- ggplot(intervention_data, aes(x = Grupo, y = Cortpre)) +
+  geom_boxplot(position = position_dodge(width = 0.8), color = "black", fill = "white") +
+  geom_jitter(position = position_jitter(width = 0.2), size = 2) +
+  labs(title = "Before",
+       x = "",
+       y = "Cortisol Level (µg/dL)") +
+  ylim(0, 45) +
+  scale_x_discrete(labels = c("Experimental")) +
+  theme(legend.position = "none")
+
+# Create a combined boxplot and scatter plot for Cortpos in the Experimental group
+combined_plot_intervention_pos <- ggplot(intervention_data, aes(x = Grupo, y = Cortpos)) +
+  geom_boxplot(position = position_dodge(width = 0.8), color = "black", fill = "white") +
+  geom_jitter(position = position_jitter(width = 0.2), size = 2) +
+  labs(title = "After",
+       x = "",
+       y = "Cortisol Level (µg/dL)") +
+  ylim(0, 45) +
+  scale_x_discrete(labels = c("Experimental")) +
+  theme(legend.position = "none")
+
+# Create a combined boxplot and scatter plot for Cortpre in the Control group
+combined_plot_control_pre <- ggplot(control_data, aes(x = Grupo, y = Cortpre)) +
+  geom_boxplot(position = position_dodge(width = 0.8), color = "black", fill = "white") +
+  geom_jitter(position = position_jitter(width = 0.2), size = 2) +
+  labs(title = "Before",
+       x = "",
+       y = "Cortisol Level (µg/dL)") +
+  ylim(0, 45) +
+  scale_x_discrete(labels = c("Control")) +
+  theme(legend.position = "none")
+
+# Create a combined boxplot and scatter plot for Cortpos in the Control group
+combined_plot_control_pos <- ggplot(control_data, aes(x = Grupo, y = Cortpos)) +
+  geom_boxplot(position = position_dodge(width = 0.8), color = "black", fill = "white") +
+  geom_jitter(position = position_jitter(width = 0.2), size = 2) +
+  labs(title = "After",
+       x = "",
+       y = "Cortisol Level (µg/dL)") +
+  ylim(0, 45) +
+  scale_x_discrete(labels = c("Control")) +
+  theme(legend.position = "none")
+
+# Display the plots side by side
+(grid_arrangement <- grid.arrange(combined_plot_intervention_pre, combined_plot_intervention_pos, combined_plot_control_pre, combined_plot_control_pos, ncol = 2))
+```
+
+
+## **Transforming data em long style**
+
+
+```{r }
+dado_longo <- read_excel("~/Isabela/dado_longo.xlsx")
+dado_longo$Cort <- dado_longo$Cort * 27.7
+
+
+
+dado_longo <- dado_longo %>%
+  mutate(
+    Grupo = recode(Grupo,
+                   "Controle" = "Control",
+                   "Intervenção" = "Experimental"),
+    Tempo = recode(Tempo,
+                   "1" = "Before",
+                   "2" = "After")
+  ) %>%
+  rename(
+    Group = Grupo,
+    Time = Tempo
+ )
+
+
+dado_longo <- dado_longo %>%
+  mutate(ID = rep(1:(nrow(dado_longo) / 2), each = 2))
+
+dado_longo$Grupo <- as.factor(dado_longo$Group)
+dado_longo$Tempo <- as.factor(dado_longo$Time)
+
+```
+
+## **Nonparametric Factorial Repeated Measures ANOVA**
+
+There are no diferences beetween the to groups.
+
+```{r }
+mod_1x1 <- nparLD(formula = Cort ~ Time*Group, # Fórmula como ANOVA 
+                  data = dado_longo, 
+                  subject= dado_longo$ID, # Variável do sujeito
+                  description = F  # Descrição da análise
+                  
+)
+
+summary(mod_1x1)
+```
+
+There is no difference beetween groups over time, but there are within-group effects.
+Besides that, we can investigate the magnitude of this difference internally.
+
+```{r}
+data_wilcox_exp <- data.frame(
+  Cortisol_pre = intervention_data$Cortpre,
+  Cortisol_pos = intervention_data$Cortpos
+)
+
+data_wilcox_exp <- stack(data_wilcox_exp)
+
+# Executar o teste de Wilcoxon
+wilcox_result_exp <- wilcox.test(values ~ ind, data = data_wilcox_exp)
+
+# Imprimir os resultados
+print(wilcox_result_exp)
+
+effect <- wilcox_effsize(values ~ ind, data= data_wilcox_exp, paired = TRUE, 
+                         ci=TRUE, ci.type= "bca", nboot= 1000)
+effect
+```
+
+
+```{r}
+# Criar um objeto de dados
+data_wilcox_C <- data.frame(
+  Cortisol_pre = control_data$Cortpre,
+  Cortisol_pos = control_data$Cortpos
+)
+
+# Criar um objeto de dados no formato longo a partir de dados_wilcox
+data_wilcox_C <- stack(data_wilcox_C)
+
+# Executar o teste de Wilcoxon
+wilcox_result_C <- wilcox.test(values ~ ind, data = data_wilcox_C)
+
+# Imprimir os resultados
+print(wilcox_result_C)
+
+effectC <- wilcox_effsize(values ~ ind, data= data_wilcox_C, 
+                          ci=TRUE, ci.type= "bca", nboot= 1000)
+effectC
+
+```
+
+The effect is larger in the experimental group.
+
+```{r}
+sessionInfo()
+```
+
+
