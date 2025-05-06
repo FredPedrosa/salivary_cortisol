@@ -65,8 +65,7 @@ Example:
 * dissertation_acute.Rmd # Main analysis script
 * PDF form of analysis
 
-Sales, I. & Pedrosa, F.G. (2024). Acute stress reduction through auditory interventions:
-A psychobiological analysis using salivary cortisol. University of Minas Gerais. https://github.com/FredPedrosa/salivary_cortisol/
+Sales, I. & Pedrosa, F.G. (2024). Acute Stress Reduction Analysis: Music vs. Podcast Intervention. University of Minas Gerais. https://github.com/FredPedrosa/salivary_cortisol/
 
 ## Author of experiment
 **Isabela Sales**  
